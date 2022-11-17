@@ -1,5 +1,10 @@
 #include <math.h>
+#include <iostream>
+#ifndef __APPLE__
 #include <omp.h>
+#else
+#include </opt/homebrew/Cellar/libomp/14.0.6/include/omp.h>
+#endif
 #include <vector>
 #include <cstring>
 
@@ -43,13 +48,13 @@ float dielectric(point A, point B, point l_m, point r_m){
 void calc(point *ligand, point *receptor, point ligand_mean, point receptor_mean,int ligand_n,int receptor_n, float *result[]){
     
     std::vector<std::pair<int,int>> N;
-    for (int i=0;i++;i< ligand_n){
-        for (int j=0;j++;j< receptor_n){
+    for (int i=0;i< ligand_n;i++){
+        for (int j=0;j< receptor_n;j++){
             N.emplace_back(std::make_pair(i,j));
         }
     }
 
-    for (int i=0;i++;i<N.size()){
+    for (int i=0;i<N.size();i++){
         int index = N[i].first* receptor_n + N[i].second;
         result[N[i].first][N[i].second] =dielectric(ligand[N[i].first],receptor[N[i].second], ligand_mean, receptor_mean);
     }
