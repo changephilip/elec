@@ -9,10 +9,10 @@ if __name__ == "__main__":
                         np.ctypeslib.ctypes.c_ulong,
                         np.ctypeslib.ndpointer(np.float32 ,ndim=2, flags ="aligned,contiguous,writeable"))
     
-    a = np.arange(6).reshape(2,3)
+    a = np.arange(9).reshape(3,3)
     a=a.astype('float32')
     b = np.zeros_like(a)
 
-    func1(a,2,b)
+    func1(a,3,b)
     print(b)
 

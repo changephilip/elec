@@ -1,6 +1,7 @@
 #include <math.h>
 #include <omp.h>
 #include <vector>
+#include <cstring>
 
 extern "C" {
 /*
@@ -49,13 +50,31 @@ void calc(point *ligand, point *receptor, point ligand_mean, point receptor_mean
     }
 
     for (int i=0;i++;i<N.size()){
+        int index = N[i].first* receptor_n + N[i].second;
         result[N[i].first][N[i].second] =dielectric(ligand[N[i].first],receptor[N[i].second], ligand_mean, receptor_mean);
     }
 }
 
 
 void calc_wrap(float *l, float *r, float *lm,float *rm, int ln, int rn, float *result){
+    point *ligand;
+    point *receptor;
 
+    point *ligand_m;
+    point *receptor_m;
+
+    ligand = new point [ln];
+    receptor = new point [rn];
+
+    std::memcpy(ligand,l,sizeof(float)*ln*3);
+    std::memcpy(receptor,r,sizeof(float)*rn*3);
+
+    std::memcpy(ligand_m, lm,sizeof(float)*3);
+    std::memcpy(receptor_m,rm,sizeof(float)*3);
+
+    float *re[ln];
+    
+    
 
 }
 
@@ -63,6 +82,7 @@ void test(float *l, int N, float *r){
     point *ligand;
     ligand= new point[N];
     
+    /*
     for (int i =0;i<N;i++){
         ligand[i].x = l[3*i];
         ligand[i].y = l[3*i+1];
@@ -71,6 +91,20 @@ void test(float *l, int N, float *r){
         r[3*i+1] = l[3*i+1];
         r[3*i+2] = l[3*i +2];
     }
+    */
+    std::memcpy(ligand,l,sizeof(float)*N*3);
+    std::memcpy(r,l,sizeof(float)*3*N);
+    /*
+    for (int i =0;i<N;i++){
+        ligand[i].x = l[3*i];
+        ligand[i].y = l[3*i+1];
+        ligand[i].z = l[3*i+2];
+        r[3*i] = ligand[i].x;
+        r[3*i+1] = ligand[i].y;
+        r[3*i+2] = ligand[i].z;
+    }
+    */
+    delete[] ligand;
 }
 
 }

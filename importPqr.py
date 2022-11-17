@@ -1,12 +1,13 @@
-from multiprocessing.sharedctypes import RawArray
+#from multiprocessing.sharedctypes import RawArray
 from platform import processor
+import cProfile
 import prody
 import numpy
 import pandas
 import math
 import scipy
 
-from sympy import N
+#from sympy import N
 
 # constant 
 e0=78.4
@@ -156,6 +157,8 @@ def writePQRSerial(pqr:Ligand, frameList,name):
     
 def dielectric(point1,point2):
     "return e*r*r 1/(e*r^2)"
+    #print(point1)
+    #print(point2)
     from scipy.spatial import distance as D
     r= D.euclidean(point1,point2)
     A= -8.5525
@@ -184,10 +187,10 @@ def dielectric_wrapper(results,set1,set2,N):
 
 
 def smallTheta(N):
-    return numpy.random.uniform(-60.0,60.0,[N,3])
+    return numpy.random.uniform(-60.0,60.0,[3])
     
 def smallVector(N):
-    return numpy.random.uniform(-5.0,5.0,[N,3])
+    return numpy.random.uniform(-5.0,5.0,[3])
 
 def calEU(ligand1: hFrame,ligand2: hFrame):
     U=0.0
@@ -202,6 +205,9 @@ def calEU(ligand1: hFrame,ligand2: hFrame):
         N.append((i,j))
    
     aux2_r=numpy.ones((len(ligand1.coord),len(ligand2.coord)))
+    #print(N1.shape)
+    #print(N2.shape)
+
     
     for item in N:
         aux2_r[item[0]][item[1]]=dielectric(ligand1.coord[item[0]]+ligand1.g_mean,ligand2.coord[item[1]]+ligand2.g_mean)
@@ -302,6 +308,7 @@ class SA:
 
     def testSA(self,N):
         for i in range(0,N):
+            
             self.move()
         #print(self.gStack)
         #print(self.rotateStack)
@@ -349,10 +356,10 @@ def run(ligand,receptor):
     
     initTwoFrames(lframe,rframe)
     
-    writePQR(l,lframe,"test")
+    writePQR(l,lframe,"init.pqr")
 
     sa=SA(lframe,rframe)
-    fstack=sa.testSA(10)
+    fstack=sa.testSA(1)
     #print(fstack)
     writePQRSerial(l,fstack,"move")
 
@@ -362,4 +369,4 @@ def run(ligand,receptor):
 
 import sys
 if __name__=="__main__":
-    run(sys.argv[1],sys.argv[2])
+    cProfile.run('run(sys.argv[1],sys.argv[2])')
