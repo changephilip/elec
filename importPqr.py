@@ -19,6 +19,9 @@ nProcess=4
 converseDistance=20.0
 nearDistance=8.0
 
+from interface import lib
+numpy.float_ = numpy.float32
+
 class Ligand:
     #relative coordinate system to geometry center
     def __init__(self,pqr):
@@ -198,19 +201,18 @@ def calEU(ligand1: hFrame,ligand2: hFrame):
 
     N1=numpy.arange(len(ligand1.coord))
     N2=numpy.arange(len(ligand2.coord))
-    N=[]
+    #N=[]
   
-    for i in N1:
-      for j in N2:
-        N.append((i,j))
-   
-    aux2_r=numpy.ones((len(ligand1.coord),len(ligand2.coord)))
+    
+    aux2_r=numpy.ones((len(ligand1.coord),len(ligand2.coord))).astype('float32')
     #print(N1.shape)
     #print(N2.shape)
-
+    #print(ligand1.g_mean.shape)
     
-    for item in N:
-        aux2_r[item[0]][item[1]]=dielectric(ligand1.coord[item[0]]+ligand1.g_mean,ligand2.coord[item[1]]+ligand2.g_mean)
+    lib.calc_wrap(ligand1.coord.astype('float32'),ligand2.coord.astype('float32'),ligand1.g_mean.astype('float32'),ligand2.g_mean.astype('float32'),len(N1),len(N2),aux2_r)      
+    #for item in N:
+    #    aux2_r[item[0]][item[1]]=dielectric(ligand1.coord[item[0]]+ligand1.g_mean,ligand2.coord[item[1]]+ligand2.g_mean)
+    aux2_r = aux2_r.astype('float64')
     
     "q1*q2/(r^2)"
     aux3_q1q2_r2=aux2_r*aux1_q1q2
@@ -347,7 +349,7 @@ def initTwoFrames(ligand: hFrame, receptor: hFrame):
 
 
 
-def run(ligand,receptor):
+def run(ligand,receptor,N):
     
     l=Ligand(ligand)
     r=Ligand(receptor)
@@ -359,7 +361,7 @@ def run(ligand,receptor):
     writePQR(l,lframe,"init.pqr")
 
     sa=SA(lframe,rframe)
-    fstack=sa.testSA(1)
+    fstack=sa.testSA(N)
     #print(fstack)
     writePQRSerial(l,fstack,"move")
 
@@ -369,4 +371,5 @@ def run(ligand,receptor):
 
 import sys
 if __name__=="__main__":
-    cProfile.run('run(sys.argv[1],sys.argv[2])')
+    cProfile.run('run(sys.argv[1],sys.argv[2],int(sys.argv[3]))')
+    #run(sys.argv[1],sys.argv[2],int(sys.argv[3]))

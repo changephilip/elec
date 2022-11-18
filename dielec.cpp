@@ -1,5 +1,7 @@
 #include <math.h>
 #include <iostream>
+
+
 #ifndef __APPLE__
 #include <omp.h>
 #else
@@ -42,10 +44,11 @@ float dielectric(point A, point B, point l_m, point r_m){
 
     float e = cA + (cB / (1 + k * (exp(-1.0 * l *cB * r))));
     return 1/(e * r * r);
+    //return r*r;
 }
 
 
-void calc(point *ligand, point *receptor, point ligand_mean, point receptor_mean,int ligand_n,int receptor_n, float *result[]){
+void calc(point *ligand, point *receptor, point ligand_mean, point receptor_mean,int ligand_n,int receptor_n, float *result){
     
     std::vector<std::pair<int,int>> N;
     for (int i=0;i< ligand_n;i++){
@@ -53,10 +56,12 @@ void calc(point *ligand, point *receptor, point ligand_mean, point receptor_mean
             N.emplace_back(std::make_pair(i,j));
         }
     }
-
+#pragma omp parallel num_threads(8) 
+    #pragma omp for
     for (int i=0;i<N.size();i++){
         int index = N[i].first* receptor_n + N[i].second;
-        result[N[i].first][N[i].second] =dielectric(ligand[N[i].first],receptor[N[i].second], ligand_mean, receptor_mean);
+        //result[N[i].first][N[i].second] =dielectric(ligand[N[i].first],receptor[N[i].second], ligand_mean, receptor_mean);
+        result[index] =dielectric(ligand[N[i].first],receptor[N[i].second], ligand_mean, receptor_mean);
     }
 }
 
@@ -65,8 +70,8 @@ void calc_wrap(float *l, float *r, float *lm,float *rm, int ln, int rn, float *r
     point *ligand;
     point *receptor;
 
-    point *ligand_m;
-    point *receptor_m;
+    point ligand_m;
+    point receptor_m;
 
     ligand = new point [ln];
     receptor = new point [rn];
@@ -74,12 +79,10 @@ void calc_wrap(float *l, float *r, float *lm,float *rm, int ln, int rn, float *r
     std::memcpy(ligand,l,sizeof(float)*ln*3);
     std::memcpy(receptor,r,sizeof(float)*rn*3);
 
-    std::memcpy(ligand_m, lm,sizeof(float)*3);
-    std::memcpy(receptor_m,rm,sizeof(float)*3);
+    std::memcpy(&ligand_m, lm,sizeof(float)*3);
+    std::memcpy(&receptor_m,rm,sizeof(float)*3);
 
-    float *re[ln];
-    
-    
+    calc(ligand,receptor,ligand_m,receptor_m,ln,rn,result);
 
 }
 
