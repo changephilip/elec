@@ -167,7 +167,8 @@ def writeEnsemble(pqr:Ligand, frameList,name):
         #print(frame.coord+frame.g_mean)
         e.addCoordset(frame.coord+frame.g_mean)
     
-    prody.writePDB(name[0:]+".pdb",e)
+    #prody.writePDB(name[0:]+".pdb",e)
+    prody.writeDCD(name+".dcd",e)
 
 def dielectric(point1,point2):
     "return e*r*r 1/(e*r^2)"
@@ -276,7 +277,7 @@ class SA:
         if self.currentEnergy > self.backEnergy:
             p=(- self.currentEnergy + self.backEnergy)/(self.backEnergy) 
             #print(-p*20)
-            if numpy.exp(-p*25) > numpy.random.random():
+            if numpy.exp(-p*30) > numpy.random.random():
                 self.acceptRate+=1
                 return True
             else:
