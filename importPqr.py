@@ -238,7 +238,7 @@ class SA:
         self.backEnergy = calEU(l,r)
         #self.backEnergy = 65536.0
         self.energyStack.append(self.backEnergy)
-
+        self.gStack.append(l.g_mean)
         self.backFrame=l
         self.currentFrame=l
         
@@ -319,9 +319,14 @@ class SA:
         for i in range(0,N):
             self.move()
 
-        print(self.gStack)
-        print(self.energyStack)
+        #print(self.gStack)
+        #print(self.energyStack)
         print(len(self.energyStack))
+        print(len(self.gStack))
+        for j in range(0,len(self.energyStack)):
+            print(self.energyStack[j])
+            print(self.gStack[j])
+        #print(len(self.energyStack))
         
         return self.frameStack
     
