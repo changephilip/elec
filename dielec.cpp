@@ -43,7 +43,7 @@ float dielectric(point A, point B, point l_m, point r_m){
  float l=0.003627;
 
     float e = cA + (cB / (1 + k * (exp(-1.0 * l *cB * r))));
-    return 1/(e * r * r);
+    return 1/(e * r );
     //return r*r;
 }
 
