@@ -331,6 +331,9 @@ class SA:
         
         return self.frameStack
     
+def initOrthoGroup(N):
+    from scipy.stats import special_ortho_group
+    return special_ortho_group.rvs(N)
 
 def initTwoFrames(ligand: hFrame, receptor: hFrame):
     "asure there is enough distance between two frames, init without spin"
@@ -350,18 +353,36 @@ def initTwoFrames(ligand: hFrame, receptor: hFrame):
     if directDistance < (lBox + rBox + converseDistance):
         directVector =  (ligand.g_mean - receptor.g_mean) + patchBox
         ligand.shift(directVector)
-    print(D.euclidean(ligand.g_mean,receptor.g_mean))
+    #print(D.euclidean(ligand.g_mean,receptor.g_mean))
     from scipy.spatial.transform import Rotation as R
     #rotate=R.random()
     #ligand.rotateFixPoint(receptor.g_mean,rotate)
     #ligand.coord= ligand.coord - ligand.g_mean
-    
-        
     return False 
 
+def initOrthoFrames(ligand: hFrame, receptor: hFrame):
+    lBox = ligand.getBox()
+    rBox = receptor.getBox()
+
+    from scipy.spatial import distance as D
+    directDistance = D.euclidean(ligand.g_mean, receptor.g_mean)
+
+    patchBox = 0.0
+    if directDistance < lBox + rBox + converseDistance:
+        patchBox += converseDistance
+        directVector = (ligand.g_mean - receptor.g_mean) + patchBox
+        ligand.shift(directVector)
+
+    from scipy.spatial.transform import Rotation as R
+    orthoFrames=[]
+    orthoGroup=R.from_euler('zxy',initOrthoGroup(256))
+
+    for r in orthoGroup:
+        orthoFrames.append(hFrame(ligand.g_mean,r.apply(ligand.coord),ligand.charge))
+    return orthoFrames
 
 
-def run(ligand,receptor,N):
+def runOneStart(ligand,receptor,N,name):
     
     l=Ligand(ligand)
     r=Ligand(receptor)
@@ -377,14 +398,30 @@ def run(ligand,receptor,N):
     fstack=sa.testSA(N)
 
     #writePQRSerial(l,fstack,"out/move")
-    writeEnsemble(l,fstack,"traj")
+    writeEnsemble(l,fstack,name)
     from scipy.spatial import distance as D
     for item in fstack:
         print(D.euclidean(item.g_mean,l.g_mean))
     return 0
 
+def runOrthoStart(ligand,receptor, N ,name):
+    l=Ligand(ligand)
+    r=Ligand(receptor)
+    lframe=hFrame(l.g_mean,l.h_coord,l.h_charge)
+    rframe=hFrame(r.g_mean,r.h_coord,r.h_charge)
+    
+    print(calEU(lframe,rframe))
+    startFrames=initOrthoFrames(lframe,rframe)
+    
+    writePQRSerial(l,startFrames,"out/start")
+
+    #writePQRSerial(l,fstack,"out/move")
+    #writeEnsemble(l,fstack,name)
+    
+    return 0
 
 import sys
 if __name__=="__main__":
     #cProfile.run('run(sys.argv[1],sys.argv[2],int(sys.argv[3]))')
-    run(sys.argv[1],sys.argv[2],int(sys.argv[3]))
+    #runOneStart(sys.argv[1],sys.argv[2],int(sys.argv[3]),sys.argv[4])
+    runOrthoStart(sys.argv[1],sys.argv[2],int(sys.argv[3]),sys.argv[4])
