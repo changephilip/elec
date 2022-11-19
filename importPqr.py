@@ -123,7 +123,7 @@ class hFrame:
 
         newMean = eularTheta.apply(self.g_mean - point) + point
 
-        newCoord = eularTheta.apply(newCoord) +point - self.g_mean
+        newCoord = eularTheta.apply(newCoord) +point - newMean
         return newMean,newCoord
 
     def rotateFixPoint(self,point,eularTheta):
@@ -332,8 +332,9 @@ class SA:
         return self.frameStack
     
 def initOrthoGroup(N):
-    from scipy.stats import special_ortho_group
-    return special_ortho_group.rvs(N)
+    #from scipy.stats import special_ortho_group
+    from scipy.spatial.transform import Rotation as R
+    return R.random(N)
 
 def initTwoFrames(ligand: hFrame, receptor: hFrame):
     "asure there is enough distance between two frames, init without spin"
@@ -375,10 +376,11 @@ def initOrthoFrames(ligand: hFrame, receptor: hFrame):
 
     from scipy.spatial.transform import Rotation as R
     orthoFrames=[]
-    orthoGroup=R.from_euler('zxy',initOrthoGroup(256))
+    orthoGroup=initOrthoGroup(64)
 
     for r in orthoGroup:
-        orthoFrames.append(hFrame(ligand.g_mean,r.apply(ligand.coord),ligand.charge))
+        new_mean,new_coord = ligand.rotateFixPoint_(receptor.g_mean,r)
+        orthoFrames.append(hFrame(new_mean,new_coord,ligand.charge))
     return orthoFrames
 
 
