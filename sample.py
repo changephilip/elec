@@ -28,11 +28,15 @@ class SA:
         self.acceptRate=0
 
     def isTooNear(self):
-        from scipy.spatial import distance as D
+        '''from scipy.spatial import distance as D
         for latom in self.currentFrame.coord:
             for ratom in self.r.coord:
                 if D.euclidean(latom,ratom) < nearDistance:
                     return True
+        '''
+        r = euclidean_distance(self.currentFrame,self.r)
+        if numpy.mean(r) < nearDistance:
+            return True
         return False
 
     def isNear(self):
@@ -65,7 +69,7 @@ class SA:
 
     
     def update(self):
-        if self.isTooNear():
+        if not self.isTooNear():
             if (self.accept()):
                 self.backFrame=self.currentFrame
                 self.backEnergy=self.currentEnergy

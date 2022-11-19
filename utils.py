@@ -1,4 +1,4 @@
-from importPqr import *
+from definition import *
 
 def writePQR(pqr: Ligand,frame: hFrame,name):
     pqr.hpqr.setCoords(frame.coord + frame.g_mean)
@@ -82,3 +82,11 @@ def calEU(ligand1: hFrame,ligand2: hFrame):
     U=numpy.sum(aux3_q1q2_r2)
 
     return -U/fpi
+
+def euclidean_distance(ligand1: hFrame,ligand2: hFrame):
+    N1 = len(ligand1.coord)
+    N2 = len(ligand2.r.coord)
+    r = numpy.ones((N1,N2)).astype('float32')
+    from interface import lib
+    lib.euclidean_distance(ligand1.coord.astype('float32'),ligand2.coord.astype('float32'),ligand1.g_mean.astype('float32'),ligand2.g_mean.astype('float32'),N1,N2 ,r)
+    return r.astype('float64')

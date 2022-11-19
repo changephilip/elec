@@ -1,10 +1,19 @@
 import numpy as np
 import os
 
-lib = np.ctypeslib.load_library("dielec.so",".")
+lib = np.ctypeslib.load_library("external.so",".")
 #cdistance = getattr(lib,'calc_wrap')
 lib.calc_wrap.restype = None
 lib.calc_wrap.argtypes = (np.ctypeslib.ndpointer(np.float32, ndim=2, flags="aligned"),
+                    np.ctypeslib.ndpointer(np.float32,ndim=2,flags="aligned"),
+                    np.ctypeslib.ndpointer(np.float32,ndim=1,flags="aligned"),
+                    np.ctypeslib.ndpointer(np.float32, ndim=1, flags="aligned"),
+                    np.ctypeslib.ctypes.c_ulong,
+                    np.ctypeslib.ctypes.c_ulong,
+                    np.ctypeslib.ndpointer(np.float32,ndim=2,flags="aligned,contiguous,writeable"))
+
+lib.euclidean_distance.restype = None
+lib.euclidean_distance.argtypes = (np.ctypeslib.ndpointer(np.float32, ndim=2, flags="aligned"),
                     np.ctypeslib.ndpointer(np.float32,ndim=2,flags="aligned"),
                     np.ctypeslib.ndpointer(np.float32,ndim=1,flags="aligned"),
                     np.ctypeslib.ndpointer(np.float32, ndim=1, flags="aligned"),

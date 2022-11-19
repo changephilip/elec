@@ -1,6 +1,6 @@
 CXX = g++
 CXXFLAGS= -std=gnu++17 -shared -fPIC -fopenmp
-dielec.so: dielec.cpp
+external.so: external.cpp
 	$(CXX)  $(CXXFLAGS) $^ -o $@
 
 clean:

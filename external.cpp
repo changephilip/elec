@@ -1,7 +1,5 @@
 #include <math.h>
 #include <iostream>
-
-
 #ifndef __APPLE__
 #include <omp.h>
 #else
@@ -32,7 +30,7 @@ typedef struct {float x;float y;float z;} point;
 
 
 
-float dielectric(point A, point B, point l_m, point r_m){
+inline float dielectric(point A, point B, point l_m, point r_m){
     float r = (A.x  - B.x + l_m.x - r_m.x)*(A.x  - B.x + l_m.x - r_m.x) + (A.y - B.y + l_m.y - r_m.y) *(A.y  -B.y + l_m.y -r_m.y) + (A.z -B.z + l_m.z - r_m.z)*(A.z - B.z + l_m.z -r_m.z);
     r = sqrtf(r);
 
@@ -45,6 +43,11 @@ float dielectric(point A, point B, point l_m, point r_m){
     float e = cA + (cB / (1 + k * (exp(-1.0 * l *cB * r))));
     return 1/(e * r );
     //return r*r;
+}
+
+inline float distance_2d(point A ,point B, point l_m, point r_m){
+    float r = (A.x  - B.x + l_m.x - r_m.x)*(A.x  - B.x + l_m.x - r_m.x) + (A.y - B.y + l_m.y - r_m.y) *(A.y  -B.y + l_m.y -r_m.y) + (A.z -B.z + l_m.z - r_m.z)*(A.z - B.z + l_m.z -r_m.z);
+    return sqrtf(r);
 }
 
 
@@ -84,8 +87,44 @@ void calc_wrap(float *l, float *r, float *lm,float *rm, int ln, int rn, float *r
 
     calc(ligand,receptor,ligand_m,receptor_m,ln,rn,result);
 
+    delete[] ligand;
+    delete[] receptor;
 }
 
+
+void euclidean_distance(float *l , float *r ,float *lm, float *rm, int ln, int rn, float *result){
+    point *ligand;
+    point *receptor;
+    point ligand_m;
+    point receptor_m;
+
+    ligand = new point [ln];
+    receptor = new point [rn];
+
+    std::memcpy(ligand, l ,sizeof(float)*ln*3);
+    std::memcpy(receptor,r, sizeof(float)*rn *3);
+
+    std::memcpy(&ligand_m, lm,sizeof(float)*3);
+    std::memcpy(&receptor_m,rm,sizeof(float)*3);
+
+    std::vector<std::pair<int,int>> N;
+    for (int i=0;i< ln;i++){
+        for (int j=0;j< rn;j++){
+            N.emplace_back(std::make_pair(i,j));
+        }
+    }
+
+    #pragma omp parallel num_threads(8) 
+    #pragma omp for
+    for (int i=0;i<N.size();i++){
+        int index = N[i].first* rn + N[i].second;
+        //result[N[i].first][N[i].second] =dielectric(ligand[N[i].first],receptor[N[i].second], ligand_mean, receptor_mean);
+        result[index] = distance_2d(ligand[N[i].first],receptor[N[i].second], ligand_m, receptor_m);
+
+    }
+    delete[] ligand;
+    delete[] receptor;
+}
 void test(float *l, int N, float *r){
     point *ligand;
     ligand= new point[N];
