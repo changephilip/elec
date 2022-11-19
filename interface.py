@@ -1,8 +1,6 @@
 import numpy as np
 import os
 
-
-
 lib = np.ctypeslib.load_library("dielec.so",".")
 #cdistance = getattr(lib,'calc_wrap')
 lib.calc_wrap.restype = None
